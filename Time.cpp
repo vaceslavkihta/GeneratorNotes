@@ -1,57 +1,108 @@
 #include "Time.h"
 
-Time::Time() : _hours(0), _min(0) { ; }
-Time::Time(int hour, int minute) :_hours(hour), _min(minute) { isCorrectlyTime(); }
-Time::Time(Time& other) :_hours(other._hours), _min(other._min) { ; }
-Time::Time(Time&& other) noexcept : _hours(other._hours), _min(other._min){
-	other._hours = 0;
-	other._min = 0;
-}
+Time::Time() : time_({0, 0}) { ; }
+Time::Time(int hour, int minute) : time_({ hour, minute }) { isCorrectlyTime(time_); }
+Time::Time(pair<int, int> sample): time_(sample) { isCorrectlyTime(time_); }
+Time::Time(const Time& other) : time_(other.time_) { isCorrectlyTime(time_); }
+
 
 void Time::changeHour(int hour) { 
-	if (hour <= 24) _hours = hour;
-	else { throw std::range_error("changeHour(int hour) generate exception std::range_error\nhour не может быть больше 24\n((Time::_hours += hour) >= 24)"); }
+	if (hour < 24) time_.first = hour;
+	else { throw std::range_error("void Time::changeHour(int) generate exception std::range_error\nargument too large\n((Time::hours_ += hour (arg)) >= 24)"); }
 }
-
 void Time::changeMin(int min) {
-	_min = min;
-	isCorrectlyTime();
+	time_.second = min;
+}
+void Time::restoreTime(int hour, int min) {
+	time_ = make_pair(hour, min);	
+}
+void Time::restoreTime(const Time& oth) { time_ = oth.time_; }
+
+int Time::getHour() const { return time_.first; }
+int Time::getMin() const { return time_.second; }
+pair<int, int> Time::getTime() const { return time_; }
+
+Time Time::operator+(const pair<int, int>& rhs) {
+	
+	pair<int, int> res = { time_.first + rhs.first, time_.second + rhs.second };
+	if (!isCorrectlyTime(res)) { res = normalizeTime(res); }
+	return res;
+}
+Time Time::operator+(const Time& rhs) {
+	return *this + rhs.time_;
+}
+Time Time::operator+(const int& rhs) {
+	return *this + make_pair(0, rhs);
 }
 
-void Time::restoreTime(int min, int hour) {
-	if (hour <= 24) _hours = hour;
-	else { cout << "hour > 24"; }
-	_min = min;
-	isCorrectlyTime();
+Time Time::operator-(const pair<int, int>& rhs) {
+	pair<int, int> res;
+	int timeInMins = time_.first * 60 + time_.second;
+	timeInMins -= rhs.first * 60; timeInMins -= rhs.second;
+	return { timeInMins / 60, timeInMins % 60 };
+}
+Time Time::operator-(const Time& rhs) {
+	return *this - rhs.time_;
+}
+Time Time::operator-(const int& rhs) { return *this - make_pair(0, rhs); }
+
+Time& Time::operator=(const Time& rhs) {
+	if (isCorrectlyTime(rhs.time_)) { time_ = rhs.time_; }
+	else { time_ = normalizeTime(rhs.time_); }
+	return *this;
+}
+Time& Time::operator=(pair<int, int> rhs) {
+	if (isCorrectlyTime(rhs)) { time_ = rhs; }
+	else { time_ = normalizeTime(rhs); }
+	return *this;
 }
 
-void Time::isCorrectlyTime() {
-	if (_min >= 60) { 
-		_hours++; 
-		_min -= 60;
-	}
-	if (_hours >= 24) { throw std::range_error("isCorrectlyTime(void) generate exception std::range_error\n_hours не может быть больше 24"); }
+Time::operator pair<int, int>() const { return time_; }
+Time::operator int() const { return time_.first * 60 + time_.second; }
+
+pair<int, int> normalizeTime(const pair<int, int>& time) {
+	int hrsInMin = time.second / 60,
+		newHours = time.first + hrsInMin, newMins = time.second % 60;
+
+	return { newHours, newMins };
+}
+bool isCorrectlyTime(const pair<int, int>& time) {
+	int hrsInMin = time.second / 60, newHours = time.first + hrsInMin;
+
+	if (time.first < 0 || time.second < 0) { throw std::range_error("bool isCorrectlyTime(const Time&) genetate std::range_error\n hours_ or min_ have negative values\n Time::hours_ < 0 || Time::min_ < 0"); }
+	if (newHours >= 24) { throw std::range_error("bool isCorrectlyTime(const Time&) generated exception\nhours >= 24 (check arguments)"); }
+	
+	if (time.second < 60) { return true; }
+	else { return false; }
 }
 
-void Time::print() {
-	string spaceH, spaceM = "";
-	_hours >= 10 ? spaceH = "" : spaceH = "0";
-	_min >= 10 ? spaceM = "" : spaceM = "0";
-	cout << spaceH << _hours << ":" << spaceM << _min;
-}
-
-void Time::operator+=(int mins)
+Time& operator+=(Time& lhs, const pair<int, int>& rhs)
 {
-	_hours += mins / 60; // hour = 60
-	_min += (mins %= 60);
-	isCorrectlyTime();
+	lhs = lhs + rhs;
+	return lhs;
+}
+Time& operator+=(Time& lhs, const Time& rhs) {
+	lhs = lhs + rhs;
+	return lhs;
+}
+Time& operator+=(Time& lhs, const int& rhs) {
+	return lhs += make_pair(0, rhs);
 }
 
+Time& operator-=(Time& lhs, const pair<int, int>& rhs) {
+	lhs = lhs - rhs;
+	return lhs;
+}
+Time& operator-=(Time& lhs, const Time& rhs) { lhs = lhs - rhs; return lhs; }
+Time& operator-=(Time& lhs, const int& rhs) { lhs = lhs - make_pair(0, rhs); return lhs; }
 
-int Time::getHour() const { return _hours; }
-int Time::getMin() const { return _min; }
-pair<int, int> Time::getTime() const { return { _hours, _min }; }
+string getTimeStr(const Time& rhs) {
+	string res = "";
+	int hours = rhs.getHour(), mins = rhs.getMin();
+	if (hours < 10) { res += "0"; }
+	res += std::to_string(hours) + ":";
 
-int timeToMins(int hours, int mins) {
-	return (mins + hours * 60);
+	if (mins < 10) { res += "0"; }
+	res += std::to_string(mins);
+	return res;
 }

@@ -3,37 +3,64 @@
 #include <iostream>
 #include <utility>
 #include <exception>
+#include <compare>
+#include <ostream>
 
 using std::cout;
 using std::endl;
 using std::string;
-using std::pair;
+using std::pair, std::make_pair;
 
 class Time
 {
 public:
 	Time();
 	Time(int, int);
-	Time(Time&);
-	Time(Time&&) noexcept;
+	Time(pair<int, int>);
+	Time(const Time&);
 
 public:
 	void changeMin(int);
 	void changeHour(int);
 	void restoreTime(int, int);
-
+	void restoreTime(const Time&);
+	
 public:
 	int getHour() const;
 	int getMin() const;
 	pair<int, int> getTime() const;
 
 public:
-	void print();
-	void operator+=(int mins);
+	Time operator+(const pair<int, int>&);
+	Time operator+(const Time&);
+	Time operator+(const int&);
+
+	Time operator-(const pair<int, int>&);
+	Time operator-(const Time&);
+	Time operator-(const int&);
+
+	Time& operator=(const Time&);
+	Time& operator=(pair<int, int>);
+
+	operator pair<int, int>() const;
+	operator int() const;
+
+public:
+	auto operator<=>(const Time&) const = default;
 
 private:
-	int _hours, _min;
-	void isCorrectlyTime();
+	pair<int, int> time_;
 };
 
-int timeToMins(int hours, int mins);
+pair<int, int> normalizeTime(const pair<int, int>&);
+bool isCorrectlyTime(const pair<int, int>&);
+
+Time& operator+=(Time&, const pair<int, int>&);
+Time& operator+=(Time&, const Time&);
+Time& operator+=(Time&, const int&);
+
+Time& operator-=(Time&, const pair<int, int>&);
+Time& operator-=(Time&, const Time&);
+Time& operator-=(Time&, const int&);
+
+string getTimeStr(const Time&);

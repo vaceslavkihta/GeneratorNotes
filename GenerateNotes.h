@@ -1,5 +1,5 @@
 #include <vector>
-#include "Reader.h"
+#include "Parser.h"
 
 #pragma once
 
@@ -7,9 +7,8 @@ class GenerateNotes {
 public:
 	GenerateNotes(); // call Reader::read
 
-
 private:
-	Reader rObj;
+	Parser rObj;
 };
 
 // Сколько сегодня заметок надо создать
