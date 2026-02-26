@@ -5,17 +5,18 @@
 using namespace std;
 
 struct Note {
-    string title, status, priority;
+    wstring title, status, priority;
     bool isAllDay = false;
-    pair<string, Time> scheduled;
+    pair<wstring, Time> scheduled;
     int timeEstimate;
 
     Note(
-        const string& title       = "",
-        const string& status      = "open",
-        const string& priority    = "normal",
-        const string& schdDate    = "",
+        const wstring& title      = L"",
+        const wstring& status     = L"open",
+        const wstring& priority   = L"normal",
+        const wstring& schdDate   = L"",
         const Time& schdTime      = Time(0, 0),
         int timeEstimate          = 0);
     void print();
+    wstring getText();
 };

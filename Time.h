@@ -8,15 +8,16 @@
 
 using std::cout;
 using std::endl;
-using std::string;
+using std::wstring, std::string;
 using std::pair, std::make_pair;
+using std::wostream;
 
 class Time
 {
 public:
 	Time();
 	Time(int, int);
-	Time(pair<int, int>);
+	Time(const pair<int, int>&);
 	Time(const Time&);
 
 public:
@@ -43,7 +44,7 @@ public:
 	Time& operator=(pair<int, int>);
 
 	operator pair<int, int>() const;
-	operator int() const;
+	explicit operator int() const;
 
 public:
 	auto operator<=>(const Time&) const = default;
@@ -63,4 +64,6 @@ Time& operator-=(Time&, const pair<int, int>&);
 Time& operator-=(Time&, const Time&);
 Time& operator-=(Time&, const int&);
 
-string getTimeStr(const Time&);
+wostream& operator<<(wostream&, const Time&);
+
+wstring getTimeStr(const Time&);

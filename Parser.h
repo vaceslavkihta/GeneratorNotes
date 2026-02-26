@@ -4,6 +4,8 @@
 #include <string>
 #include <fstream>
 #include <memory>
+#include <codecvt>
+#include <locale>
 #include "Time.h"
 #include "Note.h"
 
@@ -12,28 +14,35 @@ using namespace std;
 class Parser
 {
 public:
-	Parser(const string& path) :file_(make_unique<ifstream>(path)) {
-		if (!file_) { throw std::runtime_error("file did not oppened"); }
-		fillLessonsSchd();
-		fillSchdVec();
+	Parser(const string& path);
+
+	void parsing() {
+		parseLessons();
+		createOthNotes();
 	}
-	void fillLessonsSchd();
-	void fillSchdVec();
-	vector<Note> parseLessons();
-	void createOthNotes();
-	void createSchdFstLessn(const Note&);
-	void createSchdOthLessns(const Note&);
+
+	vector<Note> getNotes() { return notes_; }
+	vector<Note> getEdNotes() { return edNotes_; }
+
+	
 
 private:
 	unordered_map<int, pair<Time, Time>> lessonsSchedule_;
-	unique_ptr<ifstream> file_;
-	vector<string> schdVec_,
-		schdOnFstLessn_ = { "Путь в колледж", "У братков", "Путь домой + обед", "Полезное время" },
-		schdOnOthLessns_ = { "Полезное время", "Обед", "Путь в колледж", "Путь домой + ужин" };
+	unique_ptr<wifstream> file_;
+	vector<wstring> schdVec_, 
+		schdOnFstLessn_ = { L"Путь в колледж", L"У братков", L"Путь домой + обед", L"Полезное время" },
+		schdOnOthLessns_ = { L"Полезное время", L"Обед", L"Путь в колледж", L"Путь домой + ужин" };
 	vector<Note> edNotes_, notes_;
+
+	void fillLessonsSchd();
+	void fillSchdVec();
+	void parseLessons();
+	void createOthNotes();
+	void createSchdFstLessn(const Note&);
+	void createSchdOthLessns(const Note&);
 };
 
-string dateFromStr(const string&);
+wstring dateFromStr(const wstring&);
 pair<int, int> timeFromStr(const string&);
-string getTitle(const string&);
+wstring getTitle(const wstring&);
 Time castTimeToZeroMins(const Time&);

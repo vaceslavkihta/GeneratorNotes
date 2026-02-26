@@ -2,7 +2,7 @@
 
 Time::Time() : time_({0, 0}) { ; }
 Time::Time(int hour, int minute) : time_({ hour, minute }) { isCorrectlyTime(time_); }
-Time::Time(pair<int, int> sample): time_(sample) { isCorrectlyTime(time_); }
+Time::Time(const pair<int, int>& sample): time_(sample) { isCorrectlyTime(time_); }
 Time::Time(const Time& other) : time_(other.time_) { isCorrectlyTime(time_); }
 
 
@@ -96,13 +96,20 @@ Time& operator-=(Time& lhs, const pair<int, int>& rhs) {
 Time& operator-=(Time& lhs, const Time& rhs) { lhs = lhs - rhs; return lhs; }
 Time& operator-=(Time& lhs, const int& rhs) { lhs = lhs - make_pair(0, rhs); return lhs; }
 
-string getTimeStr(const Time& rhs) {
-	string res = "";
-	int hours = rhs.getHour(), mins = rhs.getMin();
-	if (hours < 10) { res += "0"; }
-	res += std::to_string(hours) + ":";
+wostream& operator<<(wostream& s, const Time& time) {
+	wstring spaceH = L"", spaceM = L"";
+	if (time.getHour() < 10) { spaceH = L"0"; }
+	if (time.getMin() < 10) { spaceM = L"0"; }
+	return s << spaceH << time.getHour() << L":" << spaceM << time.getMin();
+}
 
-	if (mins < 10) { res += "0"; }
-	res += std::to_string(mins);
+wstring getTimeStr(const Time& rhs) {
+	wstring res = L"";
+	int hours = rhs.getHour(), mins = rhs.getMin();
+	if (hours < 10) { res += L"0"; }
+	res += std::to_wstring(hours) + L":";
+
+	if (mins < 10) { res += L"0"; }
+	res += std::to_wstring(mins);
 	return res;
 }
